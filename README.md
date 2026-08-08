@@ -50,6 +50,29 @@ uvicorn main:app --reload --port 8000
 ```
 Interactive API documentation will be available at `http://localhost:8000/docs`.
 
+## 🐳 Docker Deployment
+
+### Run with Docker
+```bash
+# Build Docker image
+docker build -t propsales-backend .
+
+# Run container
+docker run -d -p 8000:8000 --env-file .env --name propsales_backend propsales-backend
+```
+
+### Run with Docker Compose
+```bash
+# Start backend service
+docker-compose up -d --build
+
+# View logs
+docker-compose logs -f
+
+# Stop service
+docker-compose down
+```
+
 ## 📁 Directory Structure
 
 ```
