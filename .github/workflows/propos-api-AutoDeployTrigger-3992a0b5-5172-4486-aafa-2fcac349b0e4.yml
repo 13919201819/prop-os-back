@@ -1,4 +1,4 @@
-name: Trigger auto deployment for propos-api
+name: Deploy propos-api
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout to the branch
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Azure Login
@@ -25,19 +25,26 @@ jobs:
           tenant-id: ${{ secrets.PROPOSAPI_AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.PROPOSAPI_AZURE_SUBSCRIPTION_ID }}
 
-      - name: Build and deploy Container App
-        uses: azure/container-apps-deploy-action@v2
-        with:
-          appSourcePath: ${{ github.workspace }}
-          dockerfilePath: Dockerfile
+      - name: Login to Azure Container Registry
+        run: |
+          echo "${{ secrets.PROPOSAPI_REGISTRY_PASSWORD }}" | docker login agraniregistry.azurecr.io \
+            --username "${{ secrets.PROPOSAPI_REGISTRY_USERNAME }}" \
+            --password-stdin
 
-          registryUrl: agraniregistry.azurecr.io
-          registryUsername: ${{ secrets.PROPOSAPI_REGISTRY_USERNAME }}
-          registryPassword: ${{ secrets.PROPOSAPI_REGISTRY_PASSWORD }}
+      - name: Build Docker image
+        run: |
+          docker build \
+            -f Dockerfile \
+            -t agraniregistry.azurecr.io/propos-api:${{ github.sha }} \
+            .
 
-          containerAppName: propos-api
-          resourceGroup: rg-propos
+      - name: Push Docker image
+        run: |
+          docker push agraniregistry.azurecr.io/propos-api:${{ github.sha }}
 
-          imageToBuild: agraniregistry.azurecr.io/propos-api:latest
-
-          yamlConfigPath: ${{ github.workspace }}/.azure/containerapp.yaml
+      - name: Deploy image to Azure Container App
+        run: |
+          az containerapp update \
+            --name propos-api \
+            --resource-group rg-propos \
+            --image agraniregistry.azurecr.io/propos-api:${{ github.sha }}
