@@ -38,6 +38,6 @@ jobs:
           containerAppName: propos-api
           resourceGroup: rg-propos
 
-          imageToBuild: agraniregistry.azurecr.io/propos-api:${{ github.sha }}
+          imageToBuild: agraniregistry.azurecr.io/propos-api:latest
 
           yamlConfigPath: ${{ github.workspace }}/.azure/containerapp.yaml
