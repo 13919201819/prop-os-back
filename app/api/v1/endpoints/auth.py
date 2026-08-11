@@ -251,8 +251,6 @@ async def verify_otp(verify_in: OtpVerifySchema, db: Optional[AsyncSession] = De
     
     if record and record.get("code") == entered_code and time.time() < record.get("expires_at", 0):
         is_valid = True
-    elif entered_code in ["123456", "000000"]:
-        is_valid = True
     elif db:
         try:
             res_task = db.execute(select(User).where(User.email == clean_email))
@@ -370,8 +368,6 @@ async def reset_password(req: ResetPasswordSchema, db: Optional[AsyncSession] = 
     is_valid = False
     record = OTP_STORE.get(clean_email)
     if record and record.get("code") == entered_code and time.time() < record.get("expires_at", 0):
-        is_valid = True
-    elif entered_code in ["123456", "000000"]:
         is_valid = True
     elif db:
         try:
