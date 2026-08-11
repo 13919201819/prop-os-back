@@ -80,6 +80,22 @@ async def register(user_in: UserCreate, db: Optional[AsyncSession] = Depends(get
         "is_active": True
     }
 
+@router.get("/check-email")
+async def check_email(email: str, db: Optional[AsyncSession] = Depends(get_db)):
+    clean_email = email.strip().lower()
+    if clean_email in REGISTERED_USERS or clean_email in ["admin@propos.ai", "builder@developer.com", "admin@dlf.com"]:
+        return {"exists": True, "email": clean_email}
+    if db:
+        try:
+            res_task = db.execute(select(User).where(User.email == clean_email))
+            result = await asyncio.wait_for(res_task, timeout=1.0)
+            existing = result.scalars().first()
+            if existing:
+                return {"exists": True, "email": clean_email}
+        except BaseException:
+            pass
+    return {"exists": False, "email": clean_email}
+
 class LoginRequest(BaseModel):
     username: Optional[str] = None
     email: Optional[str] = None
