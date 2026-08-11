@@ -40,6 +40,8 @@ class User(Base):
     phone: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     last_login: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    otp_code: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    otp_expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
 
     tenant: Mapped["Tenant"] = relationship("Tenant", back_populates="users")

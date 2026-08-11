@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
-from typing import List
 from uuid import UUID
 from app.db.session import get_db
 from app.schemas.schemas import SalesExecCreate, SalesExecResponse
@@ -59,18 +59,20 @@ MOCK_EXECUTIVES = [
     }
 ]
 
+@router.get("/", response_model=List[SalesExecResponse])
 @router.get("/executives", response_model=List[SalesExecResponse])
-def get_team_executives(tenant_id: UUID = UUID("11111111-1111-1111-1111-111111111111"), db: Session = Depends(get_db)):
+def get_team_executives(tenant_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
     """Fetch sales executive team members for builder tenant"""
     return MOCK_EXECUTIVES
 
+@router.post("/", response_model=SalesExecResponse, status_code=status.HTTP_201_CREATED)
 @router.post("/executives", response_model=SalesExecResponse, status_code=status.HTTP_201_CREATED)
-def create_team_executive(exec_in: SalesExecCreate, tenant_id: UUID = UUID("11111111-1111-1111-1111-111111111111"), db: Session = Depends(get_db)):
+def create_team_executive(exec_in: SalesExecCreate, tenant_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
     """Add new sales executive to builder team"""
     import uuid
     new_exec = {
         "id": str(uuid.uuid4()),
-        "tenant_id": str(tenant_id),
+        "tenant_id": str(tenant_id or "11111111-1111-1111-1111-111111111111"),
         "name": exec_in.name,
         "role": exec_in.role,
         "avatar_url": exec_in.avatar_url or "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120",
@@ -81,3 +83,24 @@ def create_team_executive(exec_in: SalesExecCreate, tenant_id: UUID = UUID("1111
         "badge": exec_in.badge
     }
     return new_exec
+
+@router.put("/{exec_id}", response_model=SalesExecResponse)
+def update_team_executive(exec_id: str, exec_in: SalesExecCreate, db: Session = Depends(get_db)):
+    updated_exec = {
+        "id": exec_id,
+        "tenant_id": "11111111-1111-1111-1111-111111111111",
+        "name": exec_in.name,
+        "role": exec_in.role,
+        "avatar_url": exec_in.avatar_url or "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120",
+        "deals_closed": exec_in.deals_closed,
+        "sales_revenue_cr": exec_in.sales_revenue_cr,
+        "conversion_rate": exec_in.conversion_rate,
+        "avg_response_time": exec_in.avg_response_time,
+        "badge": exec_in.badge
+    }
+    return updated_exec
+
+@router.delete("/{exec_id}")
+def delete_team_executive(exec_id: str, db: Session = Depends(get_db)):
+    return {"status": "success", "message": f"Executive {exec_id} deleted"}
+

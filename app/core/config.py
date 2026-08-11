@@ -7,15 +7,20 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
     
-    SECRET_KEY: str = "propos_super_secret_jwt_key_change_in_production_min_32_bytes"
+    SECRET_KEY: str = "propos_super_secret_jwt_key_min_32_characters_long_for_azure_prod"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7 # 7 days
     ALGORITHM: str = "HS256"
 
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:password@localhost:5432/propos_db"
+    DATABASE_URL: str = "postgresql+asyncpg://postgres:hzmnhsixmvdgthykfsxn@db.hzmnhsixmvdgthykfsxn.supabase.co:5432/postgres"
     
     # CORS
-    ALLOWED_ORIGINS: Union[str, List[str]] = "http://localhost:3000,http://127.0.0.1:3000,https://*.azurestaticapps.net"
+    ALLOWED_ORIGINS: Union[str, List[str]] = "*"
+
+    # Brevo Transactional Email Integration
+    BREVO_API_KEY: str = ""
+    BREVO_FROM_EMAIL: str = "noreply@themistrai.com"
+    BREVO_FROM_NAME: str = "PropOS"
 
     @property
     def cors_origins(self) -> List[str]:
@@ -26,5 +31,6 @@ class Settings(BaseSettings):
     class Config:
         case_sensitive = True
         env_file = ".env"
+        extra = "ignore"
 
 settings = Settings()
